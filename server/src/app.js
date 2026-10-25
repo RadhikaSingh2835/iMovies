@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { getDBStatus } from './config/db.js';
+import movieRoutes from './routes/movieRoutes.js';
 
 const app = express();
 
@@ -23,11 +24,18 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// API Routes
+app.use('/api/movies', movieRoutes);
+
 // Root welcome route
 app.get('/', (req, res) => {
   res.json({
     message: 'Welcome to iMovies API Server',
     healthCheck: '/api/health',
+    endpoints: {
+      movies: '/api/movies',
+      movieById: '/api/movies/:id',
+    },
   });
 });
 
@@ -43,6 +51,7 @@ app.use('/api', (req, res) => {
 app.use((err, req, res, next) => {
   console.error('Unhandled Server Error:', err);
   res.status(err.status || 500).json({
+    success: false,
     error: err.message || 'Internal Server Error',
   });
 });

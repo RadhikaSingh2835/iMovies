@@ -1,6 +1,24 @@
 import MovieCard from './MovieCard';
 
-export default function MovieGrid({ movies, onSelectMovie, onBookClick, onResetFilters }) {
+export default function MovieGrid({ movies, isLoading, onSelectMovie, onBookClick, onResetFilters }) {
+  if (isLoading) {
+    return (
+      <div className="movie-grid">
+        {[1, 2, 3, 4, 5, 6].map((n) => (
+          <div key={n} className="movie-card skeleton-card">
+            <div className="skeleton-poster"></div>
+            <div className="card-body">
+              <div className="skeleton-line skeleton-meta"></div>
+              <div className="skeleton-line skeleton-title"></div>
+              <div className="skeleton-line skeleton-genres"></div>
+              <div className="skeleton-line skeleton-footer"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   if (movies.length === 0) {
     return (
       <div className="empty-movies-state">

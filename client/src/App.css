@@ -407,6 +407,62 @@
   font-size: 0.95rem;
 }
 
+.results-counter {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.api-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.api-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #64748b;
+}
+
+.api-status-pill.database {
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.08);
+}
+.api-status-pill.database .api-dot {
+  background: #4ade80;
+  box-shadow: 0 0 6px #4ade80;
+}
+
+.api-status-pill.sample_data {
+  border-color: rgba(245, 197, 24, 0.35);
+  color: var(--accent-gold);
+  background: rgba(245, 197, 24, 0.08);
+}
+.api-status-pill.sample_data .api-dot {
+  background: var(--accent-gold);
+  box-shadow: 0 0 6px var(--accent-gold);
+}
+
+.api-status-pill.offline_fallback {
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.08);
+}
+.api-status-pill.offline_fallback .api-dot {
+  background: #f87171;
+}
+
 .counter-pill {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
@@ -416,6 +472,35 @@
   padding: 0.4rem 0.85rem;
   border-radius: var(--radius-full);
 }
+
+/* Skeleton Loading styles */
+.skeleton-card {
+  pointer-events: none;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.skeleton-poster {
+  aspect-ratio: 2 / 3;
+  width: 100%;
+  background: #1a1e2e;
+}
+
+.skeleton-line {
+  height: 12px;
+  background: #252b42;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.6rem;
+}
+.skeleton-line.skeleton-meta { width: 45%; }
+.skeleton-line.skeleton-title { width: 85%; height: 18px; }
+.skeleton-line.skeleton-genres { width: 60%; }
+.skeleton-line.skeleton-footer { width: 100%; height: 28px; margin-top: 1rem; }
 
 .filters-bar {
   display: grid;

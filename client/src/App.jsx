@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import MovieFilters from './components/MovieFilters';
@@ -10,6 +10,14 @@ import { SAMPLE_MOVIES } from './data/movies';
 import './App.css';
 
 export default function App() {
+  const [moviesList, setMoviesList] = useState(SAMPLE_MOVIES);
+  const [isLoading, setIsLoading] = useState(true);
+  const [apiStatus, setApiStatus] = useState({
+    connected: false,
+    source: 'loading',
+    message: 'Connecting to iMovies API...',
+  });
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('All');
   const [selectedLanguage, setSelectedLanguage] = useState('All');
@@ -17,12 +25,67 @@ export default function App() {
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [noticeMessage, setNoticeMessage] = useState(null);
 
-  // Featured Hero movie (Default to first blockbuster)
-  const featuredMovie = SAMPLE_MOVIES[0];
+  // Fetch movies from Express REST API
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchMoviesFromApi = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetch('/api/movies');
+
+        if (!res.ok) {
+          throw new Error(`API responded with status: ${res.status}`);
+        }
+
+        const json = await res.json();
+
+        if (isMounted && json.success && Array.isArray(json.data) && json.data.length > 0) {
+          // Normalize items to ensure id property exists
+          const normalized = json.data.map((m) => ({
+            ...m,
+            id: m.id || m._id,
+          }));
+
+          setMoviesList(normalized);
+          setApiStatus({
+            connected: true,
+            source: json.source || 'sample_data',
+            message:
+              json.source === 'database'
+                ? 'Connected to MongoDB Atlas'
+                : 'API Active (Sample Data Fallback)',
+          });
+        }
+      } catch (error) {
+        console.warn('iMovies API fetch error, using local fallback:', error.message);
+        if (isMounted) {
+          setApiStatus({
+            connected: false,
+            source: 'offline_fallback',
+            message: 'Server offline (Using local dataset)',
+          });
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchMoviesFromApi();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Featured Hero movie (first blockbuster in list)
+  const featuredMovie = moviesList[0] || SAMPLE_MOVIES[0];
 
   // Filter and sort movies dynamically
   const filteredMovies = useMemo(() => {
-    return SAMPLE_MOVIES.filter((movie) => {
+    return moviesList.filter((movie) => {
       // Search matching (title, synopsis, cast, director)
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
@@ -48,7 +111,7 @@ export default function App() {
       if (sortBy === 'title') return a.title.localeCompare(b.title);
       return 0;
     });
-  }, [searchQuery, selectedGenre, selectedLanguage, sortBy]);
+  }, [moviesList, searchQuery, selectedGenre, selectedLanguage, sortBy]);
 
   // Section smooth scrolling
   const handleNavigateSection = (sectionId) => {
@@ -68,6 +131,28 @@ export default function App() {
     setSelectedGenre('All');
     setSelectedLanguage('All');
     setSortBy('rating');
+  };
+
+  // Select movie & verify GET /api/movies/:id
+  const handleSelectMovie = async (movie) => {
+    setSelectedMovie(movie);
+
+    try {
+      const movieId = movie.id || movie._id;
+      const res = await fetch(`/api/movies/${movieId}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          setSelectedMovie((prev) =>
+            prev && (prev.id === movieId || prev._id === movieId)
+              ? { ...json.data, id: json.data.id || json.data._id }
+              : prev
+          );
+        }
+      }
+    } catch {
+      // Keep existing movie state on network issue
+    }
   };
 
   // Booking modal/notice trigger
@@ -97,7 +182,7 @@ export default function App() {
         {/* Spotlight Hero Banner */}
         <Hero
           featuredMovie={featuredMovie}
-          onSelectMovie={(movie) => setSelectedMovie(movie)}
+          onSelectMovie={handleSelectMovie}
           onOpenNotice={(msg) => setNoticeMessage(msg)}
         />
 
@@ -113,13 +198,15 @@ export default function App() {
           onSortChange={setSortBy}
           totalResults={filteredMovies.length}
           onResetFilters={handleResetFilters}
+          apiStatus={apiStatus}
         />
 
         {/* Movie Cards Grid */}
         <section className="movie-grid-section">
           <MovieGrid
             movies={filteredMovies}
-            onSelectMovie={(movie) => setSelectedMovie(movie)}
+            isLoading={isLoading}
+            onSelectMovie={handleSelectMovie}
             onBookClick={handleBookClick}
             onResetFilters={handleResetFilters}
           />

@@ -11,6 +11,7 @@ export default function MovieFilters({
   onSortChange,
   totalResults,
   onResetFilters,
+  apiStatus,
 }) {
   return (
     <div className="filters-container" id="movies-section">
@@ -22,6 +23,16 @@ export default function MovieFilters({
           </p>
         </div>
         <div className="results-counter">
+          {apiStatus && (
+            <span className={`api-status-pill ${apiStatus.source || 'loading'}`} title={apiStatus.message}>
+              <span className="api-dot"></span>
+              {apiStatus.source === 'database'
+                ? 'MongoDB Atlas'
+                : apiStatus.source === 'sample_data'
+                ? 'REST API (Sample Data)'
+                : 'Offline Mode'}
+            </span>
+          )}
           <span className="counter-pill">{totalResults} Movies Available</span>
         </div>
       </div>
