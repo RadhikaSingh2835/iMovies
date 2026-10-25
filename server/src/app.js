@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { getDBStatus } from './config/db.js';
 import movieRoutes from './routes/movieRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.get('/api/health', (req, res) => {
 
 // API Routes
 app.use('/api/movies', movieRoutes);
+app.use('/api/auth', authRoutes);
 
 // Root welcome route
 app.get('/', (req, res) => {
@@ -35,6 +37,9 @@ app.get('/', (req, res) => {
     endpoints: {
       movies: '/api/movies',
       movieById: '/api/movies/:id',
+      authRegister: 'POST /api/auth/register',
+      authLogin: 'POST /api/auth/login',
+      authProfile: 'GET /api/auth/me',
     },
   });
 });

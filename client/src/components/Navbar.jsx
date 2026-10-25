@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function Navbar({ onOpenNotice, onNavigateSection }) {
+export default function Navbar({ user, onOpenAuth, onLogout, onOpenNotice, onNavigateSection }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleNavClick = (sectionId) => {
@@ -47,20 +47,38 @@ export default function Navbar({ onOpenNotice, onNavigateSection }) {
           </button>
         </nav>
 
-        {/* Auth CTA Buttons */}
+        {/* Auth CTA / User Account Section */}
         <div className="nav-actions desktop-only">
-          <button
-            className="btn-outline-sm"
-            onClick={() => onOpenNotice('User Registration & Login will be activated in Phase 4 with JWT auth.')}
-          >
-            Sign In
-          </button>
-          <button
-            className="btn-primary-sm"
-            onClick={() => onOpenNotice('Account Registration will be activated in Phase 4 with password hashing.')}
-          >
-            Register
-          </button>
+          {user ? (
+            <div className="user-nav-box">
+              <div className="user-badge" title={`Signed in as ${user.email}`}>
+                <span className="user-avatar-icon">👤</span>
+                <span className="user-greeting">Hi, {user.name.split(' ')[0]}</span>
+              </div>
+              <button
+                className="btn-outline-sm btn-logout"
+                onClick={onLogout}
+                title="Sign out of your account"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <>
+              <button
+                className="btn-outline-sm"
+                onClick={() => onOpenAuth('login')}
+              >
+                Sign In
+              </button>
+              <button
+                className="btn-primary-sm"
+                onClick={() => onOpenAuth('register')}
+              >
+                Register
+              </button>
+            </>
+          )}
         </div>
 
         {/* Mobile Hamburger Toggle */}
@@ -97,25 +115,46 @@ export default function Navbar({ onOpenNotice, onNavigateSection }) {
           >
             My Bookings <span className="badge-pill">Phase 5</span>
           </button>
+
           <div className="mobile-drawer-auth">
-            <button
-              className="btn-outline-sm full-width"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenNotice('User Login will be implemented in Phase 4.');
-              }}
-            >
-              Sign In
-            </button>
-            <button
-              className="btn-primary-sm full-width"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenNotice('User Registration will be implemented in Phase 4.');
-              }}
-            >
-              Register
-            </button>
+            {user ? (
+              <div className="mobile-user-details">
+                <div className="mobile-user-info">
+                  <span className="mobile-user-name">👤 {user.name}</span>
+                  <span className="mobile-user-email">{user.email}</span>
+                </div>
+                <button
+                  className="btn-outline-sm full-width"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onLogout();
+                  }}
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <>
+                <button
+                  className="btn-outline-sm full-width"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenAuth('login');
+                  }}
+                >
+                  Sign In
+                </button>
+                <button
+                  className="btn-primary-sm full-width"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenAuth('register');
+                  }}
+                >
+                  Register
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

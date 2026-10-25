@@ -5,6 +5,7 @@ import MovieFilters from './components/MovieFilters';
 import MovieGrid from './components/MovieGrid';
 import MovieDetailsModal from './components/MovieDetailsModal';
 import NotificationModal from './components/NotificationModal';
+import AuthModal from './components/AuthModal';
 import Footer from './components/Footer';
 import { SAMPLE_MOVIES } from './data/movies';
 import './App.css';
@@ -18,12 +19,61 @@ export default function App() {
     message: 'Connecting to iMovies API...',
   });
 
+  // Authentication State
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('imovies_user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState('login');
+  const [toastMessage, setToastMessage] = useState(null);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('All');
   const [selectedLanguage, setSelectedLanguage] = useState('All');
   const [sortBy, setSortBy] = useState('rating');
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [noticeMessage, setNoticeMessage] = useState(null);
+
+  // Auto-dismiss toast notification
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => setToastMessage(null), 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
+
+  // Verify stored JWT session with GET /api/auth/me on mount
+  useEffect(() => {
+    const token = localStorage.getItem('imovies_token');
+    if (token) {
+      fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => {
+          if (!res.ok) {
+            // Token invalid or expired
+            localStorage.removeItem('imovies_token');
+            localStorage.removeItem('imovies_user');
+            setUser(null);
+          } else {
+            return res.json();
+          }
+        })
+        .then((data) => {
+          if (data && data.success && data.user) {
+            setUser(data.user);
+          }
+        })
+        .catch(() => {
+          // Keep existing cached user if offline
+        });
+    }
+  }, []);
 
   // Fetch movies from Express REST API
   useEffect(() => {
@@ -79,6 +129,27 @@ export default function App() {
       isMounted = false;
     };
   }, []);
+
+  // Authentication Handlers
+  const handleOpenAuth = (mode = 'login') => {
+    setAuthModalMode(mode);
+    setAuthModalOpen(true);
+  };
+
+  // AuthModal calls onAuthSuccess(data.user, data.token).
+  // Token is already persisted to localStorage inside AuthModal before this fires.
+  // We only need userData here to update React state.
+  const handleAuthSuccess = (userData) => {
+    setUser(userData);
+    setToastMessage(`Welcome, ${userData.name}! You are now signed in.`);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('imovies_token');
+    localStorage.removeItem('imovies_user');
+    setUser(null);
+    setToastMessage('You have been signed out successfully.');
+  };
 
   // Featured Hero movie (first blockbuster in list)
   const featuredMovie = moviesList[0] || SAMPLE_MOVIES[0];
@@ -172,8 +243,19 @@ export default function App() {
 
   return (
     <div className="app-container">
+      {/* Toast Notification Alert */}
+      {toastMessage && (
+        <div className="toast-notification">
+          <span className="toast-dot"></span>
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Top Navigation */}
       <Navbar
+        user={user}
+        onOpenAuth={handleOpenAuth}
+        onLogout={handleLogout}
         onOpenNotice={(msg) => setNoticeMessage(msg)}
         onNavigateSection={handleNavigateSection}
       />
@@ -219,6 +301,15 @@ export default function App() {
           movie={selectedMovie}
           onClose={() => setSelectedMovie(null)}
           onBookWithShowtime={handleBookWithShowtime}
+        />
+      )}
+
+      {/* Auth Modal (Sign In / Register) */}
+      {authModalOpen && (
+        <AuthModal
+          initialMode={authModalMode}
+          onClose={() => setAuthModalOpen(false)}
+          onAuthSuccess={handleAuthSuccess}
         />
       )}
 
