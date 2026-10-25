@@ -1,122 +1,153 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState, useMemo } from 'react';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import MovieFilters from './components/MovieFilters';
+import MovieGrid from './components/MovieGrid';
+import MovieDetailsModal from './components/MovieDetailsModal';
+import NotificationModal from './components/NotificationModal';
+import Footer from './components/Footer';
+import { SAMPLE_MOVIES } from './data/movies';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGenre, setSelectedGenre] = useState('All');
+  const [selectedLanguage, setSelectedLanguage] = useState('All');
+  const [sortBy, setSortBy] = useState('rating');
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [noticeMessage, setNoticeMessage] = useState(null);
+
+  // Featured Hero movie (Default to first blockbuster)
+  const featuredMovie = SAMPLE_MOVIES[0];
+
+  // Filter and sort movies dynamically
+  const filteredMovies = useMemo(() => {
+    return SAMPLE_MOVIES.filter((movie) => {
+      // Search matching (title, synopsis, cast, director)
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        movie.title.toLowerCase().includes(q) ||
+        movie.synopsis.toLowerCase().includes(q) ||
+        movie.director.toLowerCase().includes(q) ||
+        movie.cast.some((actor) => actor.toLowerCase().includes(q));
+
+      // Genre matching
+      const matchesGenre =
+        selectedGenre === 'All' || movie.genre.includes(selectedGenre);
+
+      // Language matching
+      const matchesLanguage =
+        selectedLanguage === 'All' || movie.language.toLowerCase() === selectedLanguage.toLowerCase();
+
+      return matchesSearch && matchesGenre && matchesLanguage;
+    }).sort((a, b) => {
+      if (sortBy === 'rating') return b.rating - a.rating;
+      if (sortBy === 'latest') return b.releaseYear - a.releaseYear;
+      if (sortBy === 'price-low') return a.ticketPrice - b.ticketPrice;
+      if (sortBy === 'title') return a.title.localeCompare(b.title);
+      return 0;
+    });
+  }, [searchQuery, selectedGenre, selectedLanguage, sortBy]);
+
+  // Section smooth scrolling
+  const handleNavigateSection = (sectionId) => {
+    if (sectionId === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (sectionId === 'movies') {
+      const el = document.getElementById('movies-section');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
+  // Reset filters handler
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setSelectedGenre('All');
+    setSelectedLanguage('All');
+    setSortBy('rating');
+  };
+
+  // Booking modal/notice trigger
+  const handleBookClick = (movie) => {
+    setNoticeMessage(
+      `Booking seats for "${movie.title}" (₹${movie.ticketPrice}) will be activated in Phase 5 with real-time seat availability & selection grid!`
+    );
+  };
+
+  // Showtime selection booking handler
+  const handleBookWithShowtime = (movie, date, time) => {
+    setSelectedMovie(null);
+    setNoticeMessage(
+      `Selected showtime: "${movie.title}" on ${date} at ${time}. The interactive cinema seat map will be activated in Phase 5!`
+    );
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app-container">
+      {/* Top Navigation */}
+      <Navbar
+        onOpenNotice={(msg) => setNoticeMessage(msg)}
+        onNavigateSection={handleNavigateSection}
+      />
 
-      <div className="ticks"></div>
+      <main className="main-content">
+        {/* Spotlight Hero Banner */}
+        <Hero
+          featuredMovie={featuredMovie}
+          onSelectMovie={(movie) => setSelectedMovie(movie)}
+          onOpenNotice={(msg) => setNoticeMessage(msg)}
+        />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        {/* Discovery & Filters */}
+        <MovieFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          selectedGenre={selectedGenre}
+          onGenreChange={setSelectedGenre}
+          selectedLanguage={selectedLanguage}
+          onLanguageChange={setSelectedLanguage}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          totalResults={filteredMovies.length}
+          onResetFilters={handleResetFilters}
+        />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {/* Movie Cards Grid */}
+        <section className="movie-grid-section">
+          <MovieGrid
+            movies={filteredMovies}
+            onSelectMovie={(movie) => setSelectedMovie(movie)}
+            onBookClick={handleBookClick}
+            onResetFilters={handleResetFilters}
+          />
+        </section>
+      </main>
+
+      {/* Movie Details Modal */}
+      {selectedMovie && (
+        <MovieDetailsModal
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
+          onBookWithShowtime={handleBookWithShowtime}
+        />
+      )}
+
+      {/* Feature / Phase Roadmap Notice */}
+      {noticeMessage && (
+        <NotificationModal
+          notice={noticeMessage}
+          onClose={() => setNoticeMessage(null)}
+        />
+      )}
+
+      {/* Footer */}
+      <Footer
+        onNavigateSection={handleNavigateSection}
+        onOpenNotice={(msg) => setNoticeMessage(msg)}
+      />
+    </div>
+  );
 }
-
-export default App
