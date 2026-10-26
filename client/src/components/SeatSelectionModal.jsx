@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiUrl } from "../config/api";
 
 const ROWS = ['A', 'B', 'C', 'D', 'E', 'F'];
 const SEATS_PER_ROW = 8;
@@ -54,7 +55,7 @@ export default function SeatSelectionModal({
           selectedShowtime
         )}`;
 
-        const res = await fetch(url);
+        const res = await fetch(apiUrl(url));
         const data = await res.json();
 
         if (isMounted) {
@@ -132,7 +133,7 @@ export default function SeatSelectionModal({
         unitPrice,
       };
 
-      const res = await fetch('/api/bookings', {
+      const res = await fetch(apiUrl('/api/bookings'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

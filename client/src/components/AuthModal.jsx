@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { apiUrl } from "../config/api";
 
 export default function AuthModal({ initialMode = 'login', onClose, onAuthSuccess }) {
   const [mode, setMode] = useState(initialMode);
@@ -64,7 +65,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onAuthSucces
         ? { name: name.trim(), email: email.trim(), password }
         : { email: email.trim(), password };
 
-      const res = await fetch(endpoint, {
+      const res = await fetch(apiUrl(endpoint), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -169,7 +170,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onAuthSucces
                 <input
                   id="auth-name"
                   type="text"
-                  placeholder="e.g. Radhika Singh"
+                  placeholder="e.g. UserName"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="form-input"

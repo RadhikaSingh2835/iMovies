@@ -11,6 +11,7 @@ import SeatSelectionModal from "./components/SeatSelectionModal";
 import BookingConfirmationModal from "./components/BookingConfirmationModal";
 import MyBookings from "./components/MyBookings";
 import "./App.css";
+import { apiUrl } from "./config/api";
 
 export default function App() {
   const [moviesList, setMoviesList] = useState(SAMPLE_MOVIES);
@@ -56,9 +57,9 @@ export default function App() {
   useEffect(() => {
     const token = localStorage.getItem("imovies_token");
     if (token) {
-      fetch("/api/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      fetch(apiUrl("/api/auth/me"), {
+  headers: { Authorization: `Bearer ${token}` },
+})
         .then((res) => {
           if (!res.ok) {
             // Token invalid or expired
@@ -87,7 +88,7 @@ export default function App() {
     const fetchMoviesFromApi = async () => {
       try {
         setIsLoading(true);
-        const res = await fetch("/api/movies");
+        const res = await fetch(apiUrl("/api/movies"));
 
         if (!res.ok) {
           throw new Error(`API responded with status: ${res.status}`);
@@ -226,7 +227,7 @@ export default function App() {
 
     try {
       const movieId = movie.id || movie._id;
-      const res = await fetch(`/api/movies/${movieId}`);
+      const res = await fetch(apiUrl(`/api/movies/${movieId}`));
       if (res.ok) {
         const json = await res.json();
         if (json.success && json.data) {

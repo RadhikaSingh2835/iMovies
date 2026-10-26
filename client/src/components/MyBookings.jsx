@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiUrl } from "../config/api";
 
 export default function MyBookings({ user, onOpenAuth, onBackToMovies }) {
   const [bookings, setBookings] = useState([]);
@@ -23,7 +24,7 @@ export default function MyBookings({ user, onOpenAuth, onBackToMovies }) {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch('/api/bookings/my-bookings', {
+        const res = await fetch(apiUrl('/api/bookings/my-bookings'), {
           headers: {
             Authorization: `Bearer ${token}`,
           },
