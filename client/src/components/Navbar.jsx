@@ -1,30 +1,47 @@
 import { useState } from 'react';
 
-export default function Navbar({ user, onOpenAuth, onLogout, onOpenNotice, onNavigateSection }) {
+export default function Navbar({
+  user,
+  currentView = 'movies',
+  onOpenAuth,
+  onLogout,
+  onNavigateView,
+  onNavigateSection,
+}) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleNavClick = (sectionId) => {
+  const handleHomeClick = () => {
     setMobileMenuOpen(false);
-    if (onNavigateSection) {
-      onNavigateSection(sectionId);
+    onNavigateView('movies');
+    if (onNavigateSection) onNavigateSection('home');
+  };
+
+  const handleMoviesClick = () => {
+    setMobileMenuOpen(false);
+    onNavigateView('movies');
+    if (onNavigateSection) onNavigateSection('movies');
+  };
+
+  const handleBookingsClick = () => {
+    setMobileMenuOpen(false);
+    if (!user) {
+      onOpenAuth('login');
+      return;
     }
+    onNavigateView('my-bookings');
   };
 
   return (
     <header className="navbar-container">
       <div className="navbar-content">
         {/* Brand Logo */}
-        <div className="brand" onClick={() => handleNavClick('home')} role="button" tabIndex={0}>
+        <div className="brand" onClick={handleHomeClick} role="button" tabIndex={0}>
           <div className="brand-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
               <line x1="7" y1="2" x2="7" y2="22"></line>
               <line x1="17" y1="2" x2="17" y2="22"></line>
               <line x1="2" y1="12" x2="22" y2="12"></line>
-              <line x1="2" y1="7" x2="7" y2="7"></line>
-              <line x1="2" y1="17" x2="7" y2="17"></line>
-              <line x1="17" y1="17" x2="22" y2="17"></line>
-              <line x1="17" y1="7" x2="22" y2="7"></line>
             </svg>
           </div>
           <span className="brand-text">i<span className="brand-accent">Movies</span></span>
@@ -32,18 +49,23 @@ export default function Navbar({ user, onOpenAuth, onLogout, onOpenNotice, onNav
 
         {/* Desktop Navigation Links */}
         <nav className="nav-links desktop-only">
-          <button className="nav-btn active" onClick={() => handleNavClick('home')}>
+          <button
+            className={`nav-btn ${currentView === 'movies' ? 'active' : ''}`}
+            onClick={handleHomeClick}
+          >
             Home
           </button>
-          <button className="nav-btn" onClick={() => handleNavClick('movies')}>
+          <button
+            className={`nav-btn ${currentView === 'movies' ? 'active' : ''}`}
+            onClick={handleMoviesClick}
+          >
             Movies
           </button>
           <button
-            className="nav-btn"
-            onClick={() => onOpenNotice('My Bookings is part of Phase 5. In this phase you can explore movies, ratings, and showtimes!')}
+            className={`nav-btn ${currentView === 'my-bookings' ? 'active' : ''}`}
+            onClick={handleBookingsClick}
           >
             My Bookings
-            <span className="badge-pill">Phase 5</span>
           </button>
         </nav>
 
@@ -53,7 +75,7 @@ export default function Navbar({ user, onOpenAuth, onLogout, onOpenNotice, onNav
             <div className="user-nav-box">
               <div className="user-badge" title={`Signed in as ${user.email}`}>
                 <span className="user-avatar-icon">👤</span>
-                <span className="user-greeting">Hi, {user.name.split(' ')[0]}</span>
+                <span className="user-greeting">Hi, {user.name ? user.name.split(' ')[0] : 'User'}</span>
               </div>
               <button
                 className="btn-outline-sm btn-logout"
@@ -65,16 +87,10 @@ export default function Navbar({ user, onOpenAuth, onLogout, onOpenNotice, onNav
             </div>
           ) : (
             <>
-              <button
-                className="btn-outline-sm"
-                onClick={() => onOpenAuth('login')}
-              >
+              <button className="btn-outline-sm" onClick={() => onOpenAuth('login')}>
                 Sign In
               </button>
-              <button
-                className="btn-primary-sm"
-                onClick={() => onOpenAuth('register')}
-              >
+              <button className="btn-primary-sm" onClick={() => onOpenAuth('register')}>
                 Register
               </button>
             </>
@@ -97,23 +113,17 @@ export default function Navbar({ user, onOpenAuth, onLogout, onOpenNotice, onNav
         </button>
       </div>
 
-      {/* Mobile Menu Drawer */}
+      {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="mobile-drawer">
-          <button className="mobile-nav-btn" onClick={() => handleNavClick('home')}>
+          <button className="mobile-nav-btn" onClick={handleHomeClick}>
             Home
           </button>
-          <button className="mobile-nav-btn" onClick={() => handleNavClick('movies')}>
+          <button className="mobile-nav-btn" onClick={handleMoviesClick}>
             All Movies
           </button>
-          <button
-            className="mobile-nav-btn"
-            onClick={() => {
-              setMobileMenuOpen(false);
-              onOpenNotice('My Bookings is part of Phase 5.');
-            }}
-          >
-            My Bookings <span className="badge-pill">Phase 5</span>
+          <button className="mobile-nav-btn" onClick={handleBookingsClick}>
+            My Bookings
           </button>
 
           <div className="mobile-drawer-auth">

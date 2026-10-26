@@ -1,4 +1,4 @@
-export default function Footer({ onNavigateSection, onOpenNotice }) {
+export default function Footer({ onNavigateSection, onNavigateView }) {
   return (
     <footer className="footer-container">
       <div className="footer-content">
@@ -36,13 +36,8 @@ export default function Footer({ onNavigateSection, onOpenNotice }) {
               </button>
             </li>
             <li>
-              <button onClick={() => onOpenNotice('My Bookings is activated in Phase 5.')} className="footer-link-btn">
-                My Bookings (Phase 5)
-              </button>
-            </li>
-            <li>
-              <button onClick={() => onOpenNotice('Account management will be activated in Phase 4.')} className="footer-link-btn">
-                Sign In / Register
+              <button onClick={() => onNavigateView('my-bookings')} className="footer-link-btn">
+                My Bookings
               </button>
             </li>
           </ul>
@@ -57,7 +52,7 @@ export default function Footer({ onNavigateSection, onOpenNotice }) {
             <span className="tech-badge">Express.js</span>
             <span className="tech-badge">MongoDB Atlas</span>
             <span className="tech-badge">JWT & bcrypt</span>
-            <span className="tech-badge">REST API</span>
+            <span className="tech-badge">Seat Booking Engine</span>
             <span className="tech-badge">CSS3 Dark</span>
           </div>
         </div>
@@ -66,7 +61,7 @@ export default function Footer({ onNavigateSection, onOpenNotice }) {
       <div className="footer-bottom">
         <p>&copy; {new Date().getFullYear()} iMovies Web Application. Designed for college course completion.</p>
         <div className="footer-status-pill">
-          <span className="status-dot"></span> Phase 2 Frontend Verified
+          <span className="status-dot"></span> Full-Stack Booking Active
         </div>
       </div>
     </footer>

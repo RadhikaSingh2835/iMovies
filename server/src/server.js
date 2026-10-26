@@ -1,26 +1,33 @@
+import express from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import {connectDB} from './config/db.js';
+import authRoutes from './routes/authRoutes.js';
+import movieRoutes from './routes/movieRoutes.js';
+import bookingRoutes from './routes/bookingRoutes.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+dotenv.config();
 
-// Ensure .env is always loaded from server directory
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+const app = express();
 
-import app from './app.js';
-import { connectDB } from './config/db.js';
+// Connect to MongoDB Atlas
+connectDB();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/movies', movieRoutes);
+app.use('/api/bookings', bookingRoutes);
+
+// Health Check Endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', service: 'iMovies API', timestamp: new Date() });
+});
 
 const PORT = process.env.PORT || 5000;
-
-// Initialize Database connection and start server
-const startServer = async () => {
-  await connectDB();
-
-  app.listen(PORT, () => {
-    console.log(`🚀 iMovies server running in ${process.env.NODE_ENV || 'development'} mode on http://localhost:${PORT}`);
-    console.log(`📡 Health Check endpoint: http://localhost:${PORT}/api/health`);
-  });
-};
-
-startServer();
+app.listen(PORT, () => {
+  console.log(`🎬 iMovies Backend running on port ${PORT}`);
+});

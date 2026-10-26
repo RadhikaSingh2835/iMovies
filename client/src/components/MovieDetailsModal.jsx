@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 
-export default function MovieDetailsModal({ movie, onClose, onBookWithShowtime }) {
+export default function MovieDetailsModal({ movie, onClose, onOpenSeatSelection }) {
   const [selectedDate, setSelectedDate] = useState('Today');
   const [selectedShowtime, setSelectedShowtime] = useState(
     movie?.showtimes && movie.showtimes.length > 0 ? movie.showtimes[0] : '06:00 PM'
   );
 
-  // Close on Escape key press
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
@@ -18,19 +17,18 @@ export default function MovieDetailsModal({ movie, onClose, onBookWithShowtime }
   if (!movie) return null;
 
   const dates = [
-    { label: 'Today', sub: '25 Oct' },
-    { label: 'Tomorrow', sub: '26 Oct' },
-    { label: 'Mon', sub: '27 Oct' },
+    { label: 'Today', sub: '26 Oct' },
+    { label: 'Tomorrow', sub: '27 Oct' },
+    { label: 'Wed', sub: '28 Oct' },
   ];
 
-  const handleBookingClick = () => {
-    onBookWithShowtime(movie, selectedDate, selectedShowtime);
+  const handleProceedToSeats = () => {
+    onOpenSeatSelection(movie, selectedDate, selectedShowtime);
   };
 
   return (
     <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
       <div className="modal-window" onClick={(e) => e.stopPropagation()}>
-        {/* Modal Close Button */}
         <button className="modal-close-btn" onClick={onClose} aria-label="Close modal">
           ✕
         </button>
@@ -61,7 +59,8 @@ export default function MovieDetailsModal({ movie, onClose, onBookWithShowtime }
                 className="modal-poster-img"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80';
+                  e.target.src =
+                    'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80';
                 }}
               />
               <div className="modal-quick-stats">
@@ -95,7 +94,9 @@ export default function MovieDetailsModal({ movie, onClose, onBookWithShowtime }
                 <h4 className="modal-subheading">Genres</h4>
                 <div className="modal-genre-tags">
                   {movie.genre.map((g) => (
-                    <span key={g} className="genre-tag">{g}</span>
+                    <span key={g} className="genre-tag">
+                      {g}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -117,11 +118,11 @@ export default function MovieDetailsModal({ movie, onClose, onBookWithShowtime }
                   <span className="icon-clock">🕒</span> Select Date & Showtime
                 </h4>
 
-                {/* Date Tabs */}
                 <div className="date-tabs">
                   {dates.map((d) => (
                     <button
                       key={d.label}
+                      type="button"
                       className={`date-tab ${selectedDate === d.label ? 'active' : ''}`}
                       onClick={() => setSelectedDate(d.label)}
                     >
@@ -131,11 +132,11 @@ export default function MovieDetailsModal({ movie, onClose, onBookWithShowtime }
                   ))}
                 </div>
 
-                {/* Showtime Slots */}
                 <div className="showtime-slots">
-                  {movie.showtimes.map((slot) => (
+                  {(movie.showtimes || ['06:00 PM']).map((slot) => (
                     <button
                       key={slot}
+                      type="button"
                       className={`showtime-slot ${selectedShowtime === slot ? 'active' : ''}`}
                       onClick={() => setSelectedShowtime(slot)}
                     >
@@ -145,7 +146,6 @@ export default function MovieDetailsModal({ movie, onClose, onBookWithShowtime }
                   ))}
                 </div>
 
-                {/* Booking Action */}
                 <div className="modal-booking-bar">
                   <div className="booking-summary">
                     <span className="summary-date">
@@ -155,7 +155,11 @@ export default function MovieDetailsModal({ movie, onClose, onBookWithShowtime }
                       Standard Seat: ₹{movie.ticketPrice}
                     </span>
                   </div>
-                  <button className="btn-primary" onClick={handleBookingClick}>
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    onClick={handleProceedToSeats}
+                  >
                     <span>Select Seats & Book</span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                       <line x1="5" y1="12" x2="19" y2="12"></line>

@@ -1,8 +1,13 @@
-export default function Hero({ featuredMovie, onSelectMovie, onOpenNotice }) {
+export default function Hero({ featuredMovie, onSelectMovie, onBookClick }) {
   if (!featuredMovie) return null;
 
   return (
-    <section className="hero-banner" style={{ backgroundImage: `linear-gradient(to right, rgba(12, 13, 20, 0.95) 20%, rgba(12, 13, 20, 0.75) 60%, rgba(12, 13, 20, 0.85) 100%), url(${featuredMovie.backdrop})` }}>
+    <section
+      className="hero-banner"
+      style={{
+        backgroundImage: `linear-gradient(to right, rgba(12, 13, 20, 0.95) 20%, rgba(12, 13, 20, 0.75) 60%, rgba(12, 13, 20, 0.85) 100%), url(${featuredMovie.backdrop})`,
+      }}
+    >
       <div className="hero-content">
         <div className="hero-badge-row">
           <span className="hero-badge">🔥 {featuredMovie.badge || 'Featured'}</span>
@@ -35,7 +40,7 @@ export default function Hero({ featuredMovie, onSelectMovie, onOpenNotice }) {
           </button>
           <button
             className="btn-glass"
-            onClick={() => onOpenNotice(`Booking for "${featuredMovie.title}" will be activated in Phase 5 with the seat selection grid!`)}
+            onClick={() => onBookClick(featuredMovie)}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
               <rect x="2" y="4" width="20" height="16" rx="2"></rect>
